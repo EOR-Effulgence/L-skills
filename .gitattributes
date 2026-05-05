@@ -1,0 +1,14 @@
+# LF 正規化（CRLF/LF 差分ノイズ防止）
+* text=auto eol=lf
+
+# バイナリ
+*.png binary
+*.jpg binary
+*.stl binary
+*.step binary
+*.3mf binary
+
+# Windows 専用
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

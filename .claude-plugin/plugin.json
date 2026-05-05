@@ -1,0 +1,11 @@
+{
+  "name": "l-skills",
+  "description": "EOR-Effulgence の個人用スキル/コマンド/エージェント集（クロスツール対応）",
+  "version": "0.1.0",
+  "author": {
+    "name": "EOR-Effulgence",
+    "email": "mitshir007@gmail.com"
+  },
+  "homepage": "https://github.com/EOR-Effulgence/L-skills",
+  "license": "MIT"
+}

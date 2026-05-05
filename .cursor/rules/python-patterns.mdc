@@ -1,0 +1,105 @@
+---
+description: Python プロジェクトのベストプラクティスとパターン集（uv / pydantic / pytest / イミュータブル）
+---
+
+# Python パターン
+
+## uv でのプロジェクト管理
+
+```bash
+uv init my-project
+cd my-project
+uv add fastapi pydantic
+uv add --dev pytest pytest-cov ruff mypy
+uv run python main.py
+uv run pytest
+```
+
+## pyproject.toml 構成
+
+```toml
+[project]
+name = "my-project"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["fastapi>=0.115", "pydantic>=2.0"]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.8", "mypy>=1.13"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "TCH"]
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
+```
+
+## pydantic バリデーション
+
+```python
+from pydantic import BaseModel, Field, EmailStr
+
+class User(BaseModel):
+    """イミュータブルなユーザーモデル"""
+    model_config = {"frozen": True}
+
+    name: str = Field(min_length=1)
+    email: EmailStr
+    age: int | None = Field(default=None, gt=0)
+
+user = User(name="田中", email="tanaka@example.com")
+updated = user.model_copy(update={"name": "佐藤"})
+```
+
+## テストパターン (pytest)
+
+```python
+import pytest
+from my_project.models import User
+
+class TestUser:
+    def test_正常系_ユーザー作成(self):
+        user = User(name="テスト", email="test@example.com")
+        assert user.name == "テスト"
+
+    def test_異常系_空の名前(self):
+        with pytest.raises(ValueError):
+            User(name="", email="test@example.com")
+
+@pytest.fixture
+def sample_user() -> User:
+    return User(name="テスト", email="test@example.com")
+
+@pytest.mark.parametrize("name,valid", [
+    ("valid", True),
+    ("", False),
+])
+def test_名前バリデーション(name: str, valid: bool):
+    if valid:
+        User(name=name, email="t@e.com")
+    else:
+        with pytest.raises(ValueError):
+            User(name=name, email="t@e.com")
+```
+
+## イミュータブルパターン
+
+```python
+from dataclasses import dataclass, replace
+
+@dataclass(frozen=True)
+class Config:
+    host: str = "localhost"
+    port: int = 8080
+
+config = Config()
+updated = replace(config, port=3000)
+```
